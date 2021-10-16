@@ -1,0 +1,46 @@
+---
+  - name: Include all file from groups_var
+    include_vars:
+      file: /automation/group_vars/all.yml
+     
+
+  - name: Checking if Java is already installed
+    stat:
+      path: "{{ jdk.java_home }}"
+    register: java_installed
+
+  - name: Ensure applications/java directory exists
+    file: dest={{ jdk.java_parent_dir }} state=directory
+
+  - name: Download JDK11
+    get_url:
+      url: "{{ artifactory_base_url }}/simple/libs-ibm-lic-local/com/oracle/jdk/{{ jdk.build }}/{{ jdk.archive }}"
+      dest: /tmp/{{ jdk.archive }}
+    register: jdk11_downloaded
+    tags:
+      - install_java
+    when: not java_installed.stat.exists
+
+  - name: Ensure java directory exists
+    file: name={{ jdk.java_parent_dir }} state=directory
+    tags:
+      - install_java
+
+  - name: Install JDK11 package
+    unarchive: copy=no src=/tmp/{{ jdk.archive }} dest={{ jdk.java_parent_dir }}
+    register: jdk_installed
+    when: jdk11_downloaded.changed
+    tags:
+      - install_java
+
+  - name: Set java version as default
+    alternatives: name="{{ item }}"
+      path="{{ jdk.java_home }}/bin/{{ item }}"
+      link=/usr/bin/{{ item }}
+    with_items:
+      - java
+      - jar
+      - jps
+    when: jdk_installed.changed
+    tags:
+      - install_java

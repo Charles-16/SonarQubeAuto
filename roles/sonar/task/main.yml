@@ -1,0 +1,58 @@
+---
+  - name: Include all file from groups_var
+    include_vars:
+      file: /automation/group_vars/all.yml
+
+  - name: Ensure sonar user exists
+      user: name=sonar comment="sonar user" home={{ sonar_home }} shell=/bin/bash
+
+  - name: Checking if sonar is already installed
+    stat:
+      path: "{{ sonar_home }}"
+    register: sonar_installed
+
+  - name: Download SonarQube8.9.0
+    get_url:
+        url: "{{ sonar_url }}-{{ sonar_version }}.zip"
+        dest: {{ sonar_tmp }}-{{ sonar_version }}.zip
+    register: Sonar_downloaded
+
+  - name: Ensure SonarQube directory exists
+    file: name=/applications/sonar state=directory
+
+  - name: Extract SonarQube
+    unarchive: copy=no src={{ sonar_tmp }}-{{ sonar_version }}.zip dest=/applications/sonar
+    register: sonar_installed
+
+  - name: Copy the Sonar properties file
+    template:
+      src: {{ src_template_path }}/sonar.properties.j2
+      dest: {{ des_template_path }}-{{ sonar_version }}/conf/sonar.properties
+      owner: sonar_user
+      group: sonar_user_group
+      mode: 0644
+    become: true
+
+  - name: Copy the Wrapper properties file
+    template:
+      src: {{ src_template_path }}/wrapper.conf.j2
+      dest: {{ des_template_path }}-{{ sonar_version }}/conf/wrapper.conf
+      owner: sonar_user
+      group: sonar_user_group
+      mode: 0644
+    become: true
+
+  - name: copy service
+    copy:
+      src: /automation/roles/sonar/files/sonar.service
+      dest: /etc/systemd/system/sonar.service
+    become: true
+
+
+  - name: Start and Enable Sonar Service
+    service:
+      name: sonar
+      state: started
+      enabled: yes
+    become: true
+

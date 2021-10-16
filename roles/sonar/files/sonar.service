@@ -1,0 +1,16 @@
+[Unit]
+Description=SonarQube service
+After=syslog.target network.target
+
+[Service]
+Type=forking
+
+ExecStart=/applications/sonar/sonarqube-8.9.0.43852/bin/linux-x86-64/sonar.sh start
+ExecStop=/applications/sonar/sonarqube-8.9.0.43852/bin/linux-x86-64/sonar.sh stop
+
+User=root
+Group=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

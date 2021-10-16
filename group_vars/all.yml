@@ -1,0 +1,13 @@
+jdk:
+  build: 161
+  version: 11.0.10
+  archive: jdk-11.0.10-linux_x64.tar.gz
+  java_parent_dir: /applications/java
+  java_home: /applications/java/jdk-11.0.10
+ 
+artifactory_base_url: "http://artifactory.truven.com:8070/artifactory"
+
+sonar_user_group: users
+sonar_user: sonar
+sonar_home: /home/sonar
+sonar_version: 8.9.0.43852

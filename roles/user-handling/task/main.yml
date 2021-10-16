@@ -1,0 +1,14 @@
+- name: Add {{ sonar_user_group }} group
+  group:
+    name: "{{ sonar_user_group }}"
+    state: present
+
+- name: Add sonar user with bash shell
+  user:
+    name: "{{ sonar_user }}"
+    shell: /bin/bash
+    home: "{{ sonar_home }}"
+    groups: "{{ sonar_user_group }}"
+    comment: "sonar application user"
+    append: yes
+    state: present
